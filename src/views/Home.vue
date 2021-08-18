@@ -1,18 +1,50 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <search-bar
+    @SearchEvent="search = $event"
+    :title="'Search Countries'"
+    :placeHolder="'Search...'"
+    ></search-bar>
+    <div class="countries"
+      v-if="getAllCountriesArr"
+    >
+      <country
+        v-for="(country, index) in searchCountries"
+        :key="country.slug"
+        :country="country"
+        :id="index"
+      ></country>
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+import {mapGetters} from 'vuex'
+import Country from '../components/Layout/Country/Country.vue'
+import SearchBar from '../components/UI/SearchBar/SearchBar.vue'
 export default {
   name: 'Home',
   components: {
-    HelloWorld
+    SearchBar,
+    Country
+  },
+  data(){
+    return{
+      search: ''
+    }
+  },
+  computed:{
+    ...mapGetters(['getAllCountriesArr']),
+    searchCountries(){
+      return this.getAllCountriesArr.filter((item) => {
+        return item.Country.toLowerCase().trim().match(this.search.toLowerCase().trim())
+      })
+    }
+  },
+  async created(){
+    const response = await this.$store.dispatch('getAllCountries')
+    return response
+    
   }
 }
 </script>
